@@ -7,50 +7,62 @@ from keras.layers import Flatten, Dense, Lambda, Dropout
 from keras.layers.convolutional import Convolution2D, Cropping2D
 from keras.layers.pooling import MaxPooling2D
 
+from import_data import ImportData
+
 
 lines = []
-csv_file = 'driving_log.csv'
-desktop_csv_file = 'trained_data/left_track/driving_log.csv'
+udacity_csv = 'udacity_data/driving_log.csv'
+trained_csv = 'trained_data/left_track/driving_log.csv'
 
+##############################
+##############################
 # Step 1: Read the CSV File
-with open(desktop_csv_file) as f:
+# Udacity
+with open(udacity_csv) as f:
     reader = csv.reader(f)
     for line in reader:
         # 'line' is essentially a token
         lines.append(line)
+# My Data
+with open(trained_csv) as f:
+    reader = csv.reader(f)
+    for line in reader:
+        lines.append(line)
 
 
+##############################
+##############################
 # Step 2: Build Array for Camera Views/Steering Angles
-desktop_img_path = 'trained_data/left_track/IMG/'
+udacity_image_path = 'udacity_data/IMG/'
+trained_image_path = 'trained_data/left_track/IMG/'
 images = []
 measurements = []
 for idx, line in enumerate(lines):
-    # Udacity's Example Dataset has Labels for [0]
-    if idx != 0:
-        for i in range(3):
-            # get image
-            source_path = line[i]
-            tokens = source_path.split('/')
-            filename = tokens[-1]
+    for i in range(3):
+        # get image
+        source_path = line[i]
+        tokens = source_path.split('/')
+        filename = tokens[-1]
 
-            # format to image
-            # local_path = 'IMG/' + filename
-            local_path = desktop_img_path + filename
-            image = cv2.imread(local_path)
-            images.append(image)
+        # format to image
+        # local_path = 'IMG/' + filename
+        local_path = desktop_img_path + filename
+        image = cv2.imread(local_path)
+        images.append(image)
 
-        # grab measurement
-        correction = 0.2
-        measurement = float(line[3])
-        # center image measurement
-        measurements.append(measurement)
-        # left image measurement
-        measurements.append(measurement + correction)
-        # rightimage measurement
-        measurements.append(measurement - correction)
+    # grab measurement
+    correction = 0.2
+    measurement = float(line[3])
+    # center image measurement
+    measurements.append(measurement)
+    # left image measurement
+    measurements.append(measurement + correction)
+    # rightimage measurement
+    measurements.append(measurement - correction)
 
 # print("Print images length: ", len(images))
 # print("Print measurements length: ", len(measurements))
+
 
 augmented_images = []
 augmented_measurements = []
@@ -67,7 +79,9 @@ for image, measurement in zip(images, measurements):
 
 # Step 3: Transform Training Data Into Numpy Arrays (Keras Expects That)
 X_train = np.array(images)
+# X_train = np.array(augmented_imageas)
 y_train = np.array(measurements)
+# y_train = np.array(augmented)
 
 
 # Step 4: Build Small Keras Model

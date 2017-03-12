@@ -187,7 +187,9 @@ class ImportData():
 
         if num == 0:
             randomize_brightness = 0.2 + np.random.uniform(0.2, 0.6)
+            # print('randomize_brightness', type(randomize_brightness))
             image_br[:,:,0.2] = image_br[:,:,0.2] * randomize_brightness
+            # exit()
 
         image_br = cv2.cvtColor(image_br, cv2.COLOR_HSV2RGB)
         # plt.subplot(1,2,2)
