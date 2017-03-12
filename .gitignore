@@ -1,2 +1,7 @@
-/IMG
-driving_log.csv
+/.ipynb_checkpoints
+/examples
+/run1
+/trained_data
+/udacity_data
+.floydexpt
+.floydignore

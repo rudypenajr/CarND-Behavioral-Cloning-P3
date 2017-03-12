@@ -10,3 +10,12 @@ lib64
 parts
 sdist
 var
+/.ipynb_checkpoints
+/IMG
+/examples
+.gitignore
+*.ipynb
+driving_log.csv
+*.h5
+*.md
+*.py
