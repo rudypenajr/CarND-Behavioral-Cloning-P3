@@ -86,12 +86,43 @@ train_samples, validation_samples = train_test_split(samples, test_size=0.2)
 # Data Pre-processing:
 # Shift, Flip, Change Brightness, Crop
 ###############
+# function to grab the actual image
+def grab_image(sample):
+	rand = np.random.randint(3)
+	name = sample[rand].strip()
+	# special case for udacity data
+	if sample[rand].split('/')[0].strip() == 'IMG':
+        path = dir_path + '/udacity_data/' + path
+	angle = float(sample[3])
+	if rand == 1:
+		angle = angle + 0.22
+	if rand == 2:
+		angle = angle - 0.22
+	return name, angle
+
 def pre_process(image, angle):
     image, angle = shift_img(image, angle)
     image, angle = flip_img(image, angle)
     image = brightness_img(image)
     img = image[60:136,0:image.shape[1],:]
     return cv2.resize(img, (64, 64), cv2.INTER_AREA),angle
+
+def shift_img(image, steer):
+	""" shift image randomly
+		source: https://github.com/windowsub0406/Behavior-Cloning/blob/master/model.py """
+	max_shift = 55
+	max_ang = 0.14  # ang_per_pixel = 0.0025
+
+	rows, cols, _ = image.shape
+
+	random_x = np.random.randint(-max_shift, max_shift + 1)
+	dst_steer = steer + (random_x / max_shift) * max_ang
+	if abs(dst_steer) > 1:
+	    dst_steer = -1 if (dst_steer < 0) else 1
+
+	mat = np.float32([[1, 0, random_x], [0, 1, 0]])
+	dst_img = cv2.warpAffine(image, mat, (cols, rows))
+	return dst_img, dst_steer
 
 def flip_img(image, steering):
 	""" randomly flip image to gain right turn data (track1 is biaed in left turn)
@@ -116,36 +147,7 @@ def brightness_img(image):
 	br_img = cv2.cvtColor(br_img, cv2.COLOR_HSV2RGB)
 	return br_img
 
-def shift_img(image, steer):
-	""" shift image randomly
-		source: https://github.com/windowsub0406/Behavior-Cloning/blob/master/model.py """
-	max_shift = 55
-	max_ang = 0.14  # ang_per_pixel = 0.0025
 
-	rows, cols, _ = image.shape
-
-	random_x = np.random.randint(-max_shift, max_shift + 1)
-	dst_steer = steer + (random_x / max_shift) * max_ang
-	if abs(dst_steer) > 1:
-	    dst_steer = -1 if (dst_steer < 0) else 1
-
-	mat = np.float32([[1, 0, random_x], [0, 1, 0]])
-	dst_img = cv2.warpAffine(image, mat, (cols, rows))
-	return dst_img, dst_steer
-
-# function to grab the actual image
-def grab_image(sample):
-	rand = np.random.randint(3)
-	name = sample[rand].strip()
-	# special case for udacity data
-	if sample[rand].split('/')[0].strip() == 'IMG':
-        path = dir_path + '/udacity_data/' + path
-	angle = float(sample[3])
-	if rand == 1:
-		angle = angle + 0.22
-	if rand == 2:
-		angle = angle - 0.22
-	return name,angle
 ###############
 # End - Data Pre-processing
 ###############
