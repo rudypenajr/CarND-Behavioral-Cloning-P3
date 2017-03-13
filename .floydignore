@@ -3,19 +3,12 @@
 # Do not add a trailing slash for directories
 
 .git
-.eggs
-eggs
-lib
-lib64
-parts
-sdist
-var
 /.ipynb_checkpoints
-/IMG
 /examples
-.gitignore
+/run1
+/trained_data
+/udacity_data
 *.ipynb
-driving_log.csv
 *.h5
 *.md
 *.py
