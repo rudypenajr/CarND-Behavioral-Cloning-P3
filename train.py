@@ -1,7 +1,5 @@
-# https://github.com/ahmadchatha/CarND-Behavioral-Cloning-P3/blob/master/model.py
-
-from import_data import ImportData
-from nvidia_model import build
+# from import_data import ImportData
+# from nvidia_model import build
 
 import csv
 import os

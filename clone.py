@@ -18,8 +18,8 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 udacity_csv = 'udacity_data/driving_log.csv'
 trained_csv = 'trained_data/left_track/driving_log.csv'
 trained_reverse_csv = 'trained_data/left_track_reverse/driving_log.csv'
-corrections_csv = 'trained_data/edge_turns/driving_log.csv'
-ch, row, col = 3, 64, 64
+# corrections_csv = 'trained_data/corrections/driving_log.csv'
+
 ############################################
 # Step 1: Read the CSV File
 lines = []
@@ -27,38 +27,37 @@ with open(udacity_csv) as f:
     reader = csv.reader(f)
     for line in reader:
         lines.append(line)
-print('length of 1: ', len(lines))
 
-with open(trained_csv) as f:
-    reader = csv.reader(f)
-    for line in reader:
-        lines.append(line)
-print('length of 2: ', len(lines))
+# with open(trained_csv) as f:
+#     reader = csv.reader(f)
+#     for line in reader:
+#         lines.append(line)
+#
+# with open(trained_reverse_csv) as f:
+#     reader = csv.reader(f)
+#     for line in reader:
+#         lines.append(line)
 
-with open(trained_reverse_csv) as f:
-    reader = csv.reader(f)
-    for line in reader:
-        lines.append(line)
+# with open(corrections_csv) as f:
+#     reader = csv.reader(f)
+#     for line in reader:
+#         lines.append(line)
+# print('Length of Samples: ', len(lines))
 
-with open(corrections_csv) as f:
-    reader = csv.reader(f)
-    for line in reader:
-        lines.append(line)
-
-count = 0
-new_sample = []
-for line in lines:
-    # print('sample 3: ', sample[3])
-    # exit()
-	center_angle = float(line[3])
-	if center_angle == 0.0:
-		count = count + 1
-		if np.random.uniform() < 0.2:
-			new_sample.append(line)
-	else:
-		new_sample.append(line)
-
-lines = new_sample
+# count = 0
+# new_sample = []
+# for line in lines:
+#     # print('sample 3: ', sample[3])
+#     # exit()
+# 	center_angle = float(line[3])
+# 	if center_angle == 0.0:
+# 		count = count + 1
+# 		if np.random.uniform() < 0.2:
+# 			new_sample.append(line)
+# 	else:
+# 		new_sample.append(line)
+#
+# lines = new_sample
 
 train_samples, validation_samples = train_test_split(lines, test_size=0.2)
 
@@ -80,15 +79,6 @@ def get_image_and_angle(batch_sample):
         angle = angle - 0.22
 
     return path, angle
-
-def preprocess(image, angle):
-    # image, angle = shift_img(image, angle)
-    image, angle = flip_image(image, angle)
-    image = augment_brightness(image)
-    img = image[60:136, 0:image.shape[1], :]
-
-    # return image, angle
-    return cv2.resize(img, (64, 64), cv2.INTER_AREA), angle
 
 def shift_img(image, angle):
     """ shift image randomly
@@ -127,6 +117,13 @@ def augment_brightness(image):
 
     return hsv_img
 
+def preprocess(image, angle):
+    image, angle = shift_img(image, angle)
+    image, angle = flip_image(image, angle)
+    image = augment_brightness(image)
+
+    return image, angle
+
 def train_generator(samples, batch_size=32):
     num_samples = len(samples)
     while 1:
@@ -149,8 +146,7 @@ def train_generator(samples, batch_size=32):
             yield shuffle(X_train, y_train)
 
 def valid_generator(samples, batch_size=32):
-    # image_set = np.zeros((len(validation_samples), 160, 320, 3))
-    image_set = np.zeros((len(validation_samples), 64, 64, 3))
+    image_set = np.zeros((len(validation_samples), 160, 320, 3))
     angles_set = np.zeros(len(validation_samples))
 
     for i in range(len(samples)):
@@ -159,11 +155,9 @@ def valid_generator(samples, batch_size=32):
         path = sample[0].strip()
         if path.split('/')[0] == 'IMG':
             path = dir_path + '/udacity_data/' + path
-
         image = cv2.imread(path)
-        img = image[60:136,0:image.shape[1],:]
-        image_set[i] = cv2.resize(img, (64, 64), cv2.INTER_AREA)
-        # image_set[i] = image
+        # img = image[60:136,0:image.shape[1],:]
+        image_set[i] = image
 
         # Angle
         angles_set[i] = float(sample[3])
@@ -226,10 +220,8 @@ valid_generator = valid_generator(validation_samples, batch_size=32)
 # Step 4: Build Small Keras Model
 model = Sequential()
 # normalization
-model.add(Lambda(lambda x: x / 127.5 - 1.0, input_shape=(64, 64, 3)))
-# model.add(Lambda(lambda x: x / 255.0 - 0.5, input_shape=(160, 320, 3)))
-# model.add(Cropping2D(cropping=((72,25),(0,0))))
-
+model.add(Lambda(lambda x: x / 255.0 - 0.5, input_shape=(160, 320, 3)))
+model.add(Cropping2D(cropping=((72,25),(0,0))))
 
 # nvidia nn
 model.add(Convolution2D(24,5,5,subsample=(2,2),activation='relu', name="conv0"))
@@ -251,13 +243,12 @@ model.add(Flatten())
 model.add(Dropout(0.2))
 model.add(Dense(1164, activation='relu'))
 model.add(Dropout(0.2))
-# model.add(Dropout(0.2))
 model.add(Dense(100, activation='relu'))
+model.add(Dropout(0.2))
 model.add(Dense(50, activation='relu'))
 model.add(Dropout(0.2))
-model.add(Dropout(0.2))
 model.add(Dense(10, activation='relu'))
-# model.add(Dropout(0.2))
+model.add(Dropout(0.2))
 model.add(Dense(1))
 
 # model.add(Convolution2D(24, 5, 5, subsample=(2,2), activation="relu"))
@@ -285,7 +276,12 @@ adam = Adam(lr=1e-4, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
 model.compile(optimizer=adam, loss='mse')
 
 # model.fit(X_train, y_train, validation_split=0.2, shuffle=True, nb_epoch=5)
-history_object = model.fit_generator(train_generator, samples_per_epoch=len(train_samples), validation_data=valid_generator, nb_epoch=5, verbose=1)
+history_object = model.fit_generator(
+    train_generator,
+    samples_per_epoch=len(train_samples),
+    validation_data=valid_generator,
+    nb_epoch=5,
+    verbose=1)
 
 ### print the keys contained in the history object
 print(history_object.history.keys())
