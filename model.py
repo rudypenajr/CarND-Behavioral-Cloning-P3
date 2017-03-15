@@ -12,13 +12,12 @@ from keras import backend as K
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
 
-import matplotlib.pyplot as plt
-
 dir_path = os.path.dirname(os.path.realpath(__file__))
 udacity_csv = 'udacity_data/driving_log.csv'
-trained_csv = 'trained_data/left_track/driving_log.csv'
-trained_reverse_csv = 'trained_data/left_track_reverse/driving_log.csv'
+# trained_csv = 'trained_data/left_track/driving_log.csv'
+# trained_reverse_csv = 'trained_data/left_track_reverse/driving_log.csv'
 # corrections_csv = 'trained_data/corrections/driving_log.csv'
+
 
 ############################################
 # Step 1: Read the CSV File
