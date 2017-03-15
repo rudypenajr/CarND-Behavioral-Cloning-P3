@@ -15,9 +15,9 @@ from sklearn.utils import shuffle
 import matplotlib.pyplot as plt
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-udacity_csv = 'udacity_data/driving_log.csv'
-trained_csv = 'trained_data/left_track/driving_log.csv'
-trained_reverse_csv = 'trained_data/left_track_reverse/driving_log.csv'
+udacity_csv = '../udacity_data/driving_log.csv'
+trained_csv = '../trained_data/left_track/driving_log.csv'
+trained_reverse_csv = '../trained_data/left_track_reverse/driving_log.csv'
 # corrections_csv = 'trained_data/corrections/driving_log.csv'
 
 ############################################
@@ -295,5 +295,5 @@ plt.xlabel('epoch')
 plt.legend(['training set', 'validation set'], loc='upper right')
 plt.show()
 
-model.save('model.h5')
-K.clear_session()
+# model.save('model.h5')
+# K.clear_session()

@@ -81,94 +81,47 @@ Training data was chosen to keep the vehicle driving on the road. I used a combi
 
 ####1. Solution Design Approach
 
-The overall strategy for deriving a model architecture was to ...
+The overall strategy for deriving a model architecture was to use what works from the previous proejcts and some help from NVIDIA.
 
-My first step was to use a convolution neural network model similar to the ... I thought this model might be appropriate because ...
+So the first step was to use a convolutional neural network model similar to that of NVIDIA and fill in some possible "gaps" with what we accomplished in the Traffic Sign Classifier Project. The NVIDIA acted a AlexNet in some respects, acting as a backbone to build upon.
 
-In order to gauge how well the model was working, I split my image and steering angle data into a training and validation set. I found that my first model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was overfitting.
+In order to combat overfitting (initial models had a low mean squared error on the training set but a high mean squared error on validation set), dropout was introduced in the dense layers.
 
-To combat the overfitting, I modified the model so that ...
+Around this point, I went back and forth between datasets. I tried learning from my own dataset vs. the data provided by Udacity. Udacity's data favored more favorable in the end to the model created.
 
-Then I ...
+The final step was to run the simulator to see how well the car was driving around track one. I had the biggest issue on the sharp turns for quite some time. My first attempt to solve this issue was by adding additional data on those sharp turns, which still did not improve my model. Upon doing further research, I found that it was rate of my dropout that could be impacting my sharp turns. When I reduced the rate of the dropout from `0.5` to `0.2`, my model was successfully able to attempt the sharp turns.
 
-The final step was to run the simulator to see how well the car was driving around track one. There were a few spots where the vehicle fell off the track... to improve the driving behavior in these cases, I ....
-
-At the end of the process, the vehicle is able to drive autonomously around the track without leaving the road.
-
-**Answer:**
-The overall strategy for deriving a good model architecture was to find a balance between the architecture and the approriate data.
-
-The first steps I implemented were assisted with the [Self Driving Car Q & A | Behavior Cloning Youtube Video](https://www.youtube.com/watch?v=rpxZ87YFg0M). We started with a simplistic network:
-
-```
-Convolution -> ReLU -> MaxPooling2D -> Convolution -> ReLU -> MaxPooling2D ->
-Flatten -> Fully Connected -> Fully Connected -> Fully Connected
-```
-which did not work so well. Because of the bias for left turning in the simulator, it would ultimiately end up off the street.
-
-Two things needed to improve, my dataset and probably my neural network. Based of the recommendation, I pursued the [NVIDIA Self Driving Car Model](http://images.nvidia.com/content/tegra/automotive/images/2016/solutions/pdf/end-to-end-dl-using-px.pdf) with some tweaks that I thought would help, learned from the previous project (Traffic Sign Classfier). To optimize the data, I practiced using the simiulator until I feel more comfortable recording my laps. I did 3 laps going the correct direction and then did 3 laps in the reverse to hopefully eliminate the left bias. Additionally, I did a few recordings for correcting the car when it was on the lane lines.
-
-With all the data, I implemented a few other preprocessing tricks to help the model learn. I implemented a flip, shift, and a brightness adjustment before separating the into training and validation. It was around this stage that my model would beging to work **at times** and at other times would not work.
-
-I then when back and started adding more training data for the edge cases that I seemed to be running into. For instance, recovering when going into the lane lines. Around this same time, I did some digging into what other options I had to modify the NVIDIA framework
+At the end of this long and sometimes frustrating process, I was able to drive autonomously around the track without leaving the road, even correcting itself at times. :tada: :tada: :tada:
 
 
 ####2. Final Model Architecture
 
-The final model architecture (model.py lines 18-24) consisted of a convolution neural network with the following layers and layer sizes ...
+Here is a visualization of the architecture:
 
-Here is a visualization of the architecture (note: visualizing the architecture is optional according to the project rubric)
+![Neural Network][assets/nn.png]
 
-![alt text][image1]
-
-**Answer:**
 
 ####3. Creation of the Training Set & Training Process
 
-To capture good driving behavior, I first recorded two laps on track one using center lane driving. Here is an example image of center lane driving:
+Initially, I had created my own dataset under `trained_data` but my model was not working properly with that dataset. I then decided to focus on what Udacity had provided and was able to move closer to a model that would produce a successful lap around the track 1. I think I was just really bad at learning how to drive this simulator.
 
-![alt text][image2]
+To augment the dataset, I did the following:
 
-I then recorded the vehicle recovering from the left side and right sides of the road back to center so that the vehicle would learn to .... These images show what a recovery looks like starting from ... :
+* **Shifting Images:** Based off what I understood from the NVIDIA paper, shifting the image allows us to get another set of various data points. By shifting, we are moving the image in the x-axis direction. In the case of NVIDIA's paper, I believe they use this to help steer the vehicle back to the desired location and orientation.
 
-![alt text][image3]
-![alt text][image4]
-![alt text][image5]
+![Neural Network][assets/preprocess_shifting.jpg]
 
-Then I repeated this process on track two in order to get more data points.
+* **Flipping Image:** By shifting the data, we are able to agument and balance left and right angles.
 
-To augment the data sat, I also flipped images and angles thinking that this would ... For example, here is an image that has then been flipped:
+![Neural Network][assets/preprocess_flip.jpg]
 
-![alt text][image6]
-![alt text][image7]
+* **Brightness Augmentation:** This will come in handy for track 2 because track 1 is much brighter than track 2. Track 2 has added trees, hills, etc. that cause shadows.
 
-Etc ....
+![Neural Network][assets/preprocess_brightness.jpg]
 
-After the collection process, I had X number of data points. I then preprocessed this data by ...
+After separating the csv from a sample of 8026 (rows within csv), I had 6428 rows for training and 1608 for validation. I believe that gives us 19,284 for images within the training set (includes center, left and right) and 4,824 for images within the validation ste (includes center, left, and right).
 
+Within the training generator, I do multiple shuffles. I do a shuffle prior to separating batches and as I `yield` the `X_train` (images) and `y_train` (steering angles) datasets.
 
-I finally randomly shuffled the data set and put Y% of the data into a validation set.
+I use this training data to tarin the model. The validation set helps determine fi the model was over or under fitting. The ideal number of epochs for my model was 5 as evidence of my completetion of a lap around track 1. As for the optimizer used within compiling the model, I used the adam optimizer with a learning rate of `0.0001`. I know the adam optimizer would handle that learning rate for itself but at some point during many iterations of training, I manually set it and left it as is.
 
-I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was Z as evidenced by ... I used an adam optimizer so that manually training the learning rate wasn't necessary.
-
-### Anwser Done
-**Answer:**
-To capture good driving behavior, I first recorded 2 laps going in the correct direction on track one using center lane driving and two laps going in the opposite direction on track one using center lane driving. Here is an example image of center lane driving:
-
-![Center Lane Driving][/examples/left_track/center_2017_03_09_19_35_51_413.jpg]
-
-I then recorded the video recovering from the right side of the road back to center so that the vehicle would learn to adjust itself. The following images show a glimpse of that:
-
-![Recovery Lane Driving][/examples/edge_turns/center_2017_03_12_17_04_38_057.jpg]
-![Recovery Lane Driving][/examples/edge_turns/center_2017_03_12_17_04_38_895.jpg]
-![Recovery Lane Driving][/examples/edge_turns/center_2017_03_12_17_04_39_591.jpg]
-![Recovery Lane Driving][/examples/edge_turns/center_2017_03_12_17_04_39_591.jpg]
-![Recovery Lane Driving][/examples/edge_turns/center_2017_03_12_17_04_40_228.jpg]
-
-After the entire collection process, I had x number of data points. I imported the data for the different data sources and ran `train_test_split` with a `20%` test size. From here I utilized the generator method that was presented to us in our lesson.  I then ran a routine for preprocessing which involed the following:
-
-* Shifting the Image
-* Flipping the Image
-* Augmenting the Brightness of the Image
-
-I used the training data for training the model and the validation set to help determine whether we were over or under fitting. I used the adam optimizer so that manually training the learning rate wasn't necessary.
