@@ -14,13 +14,13 @@ The goals / steps of this project are the following:
 
 
 ## Rubric Points
-###Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.
+### Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.
 
 ---
 ---
-###Files Submitted & Code Quality
+### Files Submitted & Code Quality
 
-####1. Submission includes all required files and can be used to run the simulator in autonomous mode :heavy_check_mark:
+#### 1. Submission includes all required files and can be used to run the simulator in autonomous mode :heavy_check_mark:
 
 My project includes the following files:
 
@@ -29,22 +29,22 @@ My project includes the following files:
 * `model.h5`: Contains a trained convolution neural network.
 * `writeup_report.md`: Summarizing my results and findings... and frustrations. :stuck_out_tongue_winking_eye:
 
-####2. Submission includes functional code :heavy_check_mark:
+#### 2. Submission includes functional code :heavy_check_mark:
 Using the Udacity provided simulator and my drive.py file, the car can be driven autonomously around the track by executing
 
 ```
 python drive.py model.h5
 ```
 
-####3. Submission code is usable and readable :heavy_check_mark:
+#### 3. Submission code is usable and readable :heavy_check_mark:
 
 The `model.py` file contains the code for training and saving the convolution neural network. The file shows the pipeline I used for training and validating the model, and it contains comments to explain how the code/functions works.
 
 ---
 ---
-###Model Architecture and Training Strategy
+### Model Architecture and Training Strategy
 
-####1. An appropriate model architecture has been employed :heavy_check_mark:
+#### 1. An appropriate model architecture has been employed :heavy_check_mark:
 
 The model architecutre was inspired from the following sources:
 
@@ -56,19 +56,19 @@ Data normalization in the model was done using Kera's Lambda Layer and Kera's Co
 The model consists of depth 24, 36, 48, and 64 with 5x5 filters and 3x3 filters (`model.py` lines 193 - 206). This model includes the use of RELU layers within the Convolutional Layers and Fully Connected Layers (`model.py` lines 193 - 206). It also includes a deeper Fully Connected Layer with "neurons" descending from 1124 to 1 (`model.py` lines 209 - 218). Additionally, within the Fully Connected Layers, Dropout is introduced with a rate of `0.2` (`model.py` lines 209 - 218).
 
 
-####2. Attempts to reduce overfitting in the model :heavy_check_mark:
+### 2. Attempts to reduce overfitting in the model :heavy_check_mark:
 
 To reduce overfitting in the model, Dropout was introduced in the dense layers. I originally started with a modest dropout rate (`0.5`) but, I kept having issues on sharp turns. Once I reduced it to the rate of `0.2`, it appeared to help.
 
 The model was trained and validated on different data sets to ensure that the model avoided overfitting (`model.py` lines 32).
 
 
-####3. Model parameter tuning
+#### 3. Model parameter tuning
 
 The model used an Adam Optimizer with a learning rate of `0.0001`.  (`model.py` line 219-220).
 
 
-####4. Appropriate training data
+#### 4. Appropriate training data
 
 The training data chosen for this project was actually the data provided from Udacity. I had tried training with my own recordings, which encompassed two full laps fowards and backwards with a combination of recovering from left and right sides of the road. Ultimately, the model I had created worked best the Udacity Data.
 
@@ -79,7 +79,7 @@ Training data was chosen to keep the vehicle driving on the road. I used a combi
 
 ###Model Architecture and Training Strategy
 
-####1. Solution Design Approach
+#### 1. Solution Design Approach
 
 The overall strategy for deriving a model architecture was to use what works from the previous proejcts and some help from NVIDIA.
 
@@ -94,14 +94,14 @@ The final step was to run the simulator to see how well the car was driving arou
 At the end of this long and sometimes frustrating process, I was able to drive autonomously around the track without leaving the road, even correcting itself at times. :tada: :tada: :tada:
 
 
-####2. Final Model Architecture
+#### 2. Final Model Architecture
 
 Here is a visualization of the architecture:
 
 ![Neural Network][assets/nn.png]
 
 
-####3. Creation of the Training Set & Training Process
+#### 3. Creation of the Training Set & Training Process
 
 Initially, I had created my own dataset under `trained_data` but my model was not working properly with that dataset. I then decided to focus on what Udacity had provided and was able to move closer to a model that would produce a successful lap around the track 1. I think I was just really bad at learning how to drive this simulator.
 
