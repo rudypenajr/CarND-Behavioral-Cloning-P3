@@ -1,8 +1,4 @@
-#**Behavioral Cloning** 
-
----
-
-**Behavioral Cloning Project**
+##**Behavioral Cloning Project**
 
 The goals / steps of this project are the following:
 
@@ -77,7 +73,7 @@ The data I had created as well was also very heavy, creation of the model took m
 Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road ...
 
 
-###Model Architecture and Training Strategy
+### Model Architecture and Training Strategy
 
 #### 1. Solution Design Approach
 
@@ -98,7 +94,7 @@ At the end of this long and sometimes frustrating process, I was able to drive a
 
 Here is a visualization of the architecture:
 
-![Neural Network][assets/nn.png]
+![Neural Network](assets/nn.png)
 
 
 #### 3. Creation of the Training Set & Training Process
@@ -109,19 +105,32 @@ To augment the dataset, I did the following:
 
 * **Shifting Images:** Based off what I understood from the NVIDIA paper, shifting the image allows us to get another set of various data points. By shifting, we are moving the image in the x-axis direction. In the case of NVIDIA's paper, I believe they use this to help steer the vehicle back to the desired location and orientation.
 
-![Neural Network][assets/preprocess_shifting.jpg]
+![Neural Network](assets/preprocess_shifting.jpg)
 
 * **Flipping Image:** By shifting the data, we are able to agument and balance left and right angles.
 
-![Neural Network][assets/preprocess_flip.jpg]
+![Neural Network](assets/preprocess_flip.jpg)
 
 * **Brightness Augmentation:** This will come in handy for track 2 because track 1 is much brighter than track 2. Track 2 has added trees, hills, etc. that cause shadows.
 
-![Neural Network][assets/preprocess_brightness.jpg]
+![Neural Network](assets/preprocess_brightness.jpg)
 
 After separating the csv from a sample of 8026 (rows within csv), I had 6428 rows for training and 1608 for validation. I believe that gives us 19,284 for images within the training set (includes center, left and right) and 4,824 for images within the validation ste (includes center, left, and right).
 
 Within the training generator, I do multiple shuffles. I do a shuffle prior to separating batches and as I `yield` the `X_train` (images) and `y_train` (steering angles) datasets.
 
 I use this training data to tarin the model. The validation set helps determine fi the model was over or under fitting. The ideal number of epochs for my model was 5 as evidence of my completetion of a lap around track 1. As for the optimizer used within compiling the model, I used the adam optimizer with a learning rate of `0.0001`. I know the adam optimizer would handle that learning rate for itself but at some point during many iterations of training, I manually set it and left it as is.
+
+
+---
+#### Final Thoughts:
+I think this project was truly a test of patience and endurance. I was unforunately unable to `scp` my files to my Amazon ec2 instance so my progress was a lot harder and more painful. I even tried to work with the Floyd service but that also did not cooperate with me. So while this project was rewarding, I think a little more emphasis should go into prepping us for the behemoth that is Amazon. Granted I am familiar with it and have had experience with it, it still has it's hiccups that can trip people as myself up from time to time.
+
+---
+#### Improvements/Next Steps:
+* I did a bit of research and had seen that some people had moved to using ELUs. I am curious if that would help improve my model. I may try that next.
+	* [Source 1](https://medium.com/@jmitchell1991/behavioral-cloning-self-driving-car-simulation-14531358c87e#.ger1fptta)
+	* [Source 2](https://arxiv.org/pdf/1511.07289v1.pdf)
+* I want to continue to dig into why my dataset had so much trouble with my network while Udacity's dataset seem to compile.
+* Look into shadows as another preprocessing step for Track 2.
 
