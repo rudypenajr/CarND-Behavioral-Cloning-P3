@@ -22,24 +22,49 @@ trained_reverse_csv = 'trained_data/left_track_reverse/driving_log.csv'
 
 ############################################
 # Step 1: Read the CSV File
-############################################
 lines = []
 with open(udacity_csv) as f:
     reader = csv.reader(f)
     for line in reader:
         lines.append(line)
 
+# with open(trained_csv) as f:
+#     reader = csv.reader(f)
+#     for line in reader:
+#         lines.append(line)
+#
+# with open(trained_reverse_csv) as f:
+#     reader = csv.reader(f)
+#     for line in reader:
+#         lines.append(line)
+
+# with open(corrections_csv) as f:
+#     reader = csv.reader(f)
+#     for line in reader:
+#         lines.append(line)
+# print('Length of Samples: ', len(lines))
+
+# count = 0
+# new_sample = []
+# for line in lines:
+#     # print('sample 3: ', sample[3])
+#     # exit()
+# 	center_angle = float(line[3])
+# 	if center_angle == 0.0:
+# 		count = count + 1
+# 		if np.random.uniform() < 0.2:
+# 			new_sample.append(line)
+# 	else:
+# 		new_sample.append(line)
+#
+# lines = new_sample
+
 train_samples, validation_samples = train_test_split(lines, test_size=0.2)
 
 
 ############################################
-# Step 2: Helper Methods for Images, Pass through Generators
-############################################
+# Step 2: Build Array for Camera Views/Steering Angles
 def get_image_and_angle(batch_sample):
-    """
-    :param batch_sample: Row from CSV
-    :return: String (path, angle are strings from row)
-    """
     # Image
     random = np.random.randint(3)
     path = batch_sample[random].strip()
@@ -56,15 +81,8 @@ def get_image_and_angle(batch_sample):
     return path, angle
 
 def shift_img(image, angle):
-    """
-    Random Shift Image
-    Inspiration for this Edition:
-    source: https://github.com/windowsub0406/Behavior-Cloning/blob/master/model.py
-
-    :param image: Numpy Array
-    :param angle: Float
-    :return: Numpy Array, Float (Altered)
-    """
+    """ shift image randomly
+    	source: https://github.com/windowsub0406/Behavior-Cloning/blob/master/model.py """
     max_shift = 55
     max_ang = 0.14  # ang_per_pixel = 0.0025
 
@@ -80,11 +98,6 @@ def shift_img(image, angle):
     return dst_img, steer
 
 def flip_image(image, angle):
-    """
-    :param image: Numpy Array
-    :param angle: Float
-    :return: Numpy Array, Float (Altered)
-    """
     flip_image = image.copy()
     flip_angle = angle
     num = np.random.randint(2)
@@ -94,10 +107,6 @@ def flip_image(image, angle):
     return flip_image, flip_angle
 
 def augment_brightness(image):
-    """
-    :param image: Numpy Array
-    :return: Numpy Array, (Altered)
-    """
     hsv_img = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
     random = np.random.randint(2)
 
@@ -109,11 +118,6 @@ def augment_brightness(image):
     return hsv_img
 
 def preprocess(image, angle):
-    """
-    :param image: Numpy Array
-    :param angle: Float
-    :return: Numpy Array, Float (Altered)
-    """
     image, angle = shift_img(image, angle)
     image, angle = flip_image(image, angle)
     image = augment_brightness(image)
@@ -121,16 +125,6 @@ def preprocess(image, angle):
     return image, angle
 
 def train_generator(samples, batch_size=32):
-    """
-    Generators can be a great way to work with large amounts of data.
-    Instead of storing the preprocessed data in memory all at once,
-    using a generator you can pull pieces of the data and process them
-    on the fly only when you need them, which is much more memory-efficient.
-
-    :param samples: Array
-    :param batch_size: Integer
-    :return: Numpy Array (Images and Steering)
-    """
     num_samples = len(samples)
     while 1:
         shuffle(samples)
@@ -152,11 +146,6 @@ def train_generator(samples, batch_size=32):
             yield shuffle(X_train, y_train)
 
 def valid_generator(samples, batch_size=32):
-    """
-    :param samples: Array
-    :param batch_size: Integer
-    :return: Numpy Array (Images and Steering
-    """
     image_set = np.zeros((len(validation_samples), 160, 320, 3))
     angles_set = np.zeros(len(validation_samples))
 
@@ -175,21 +164,66 @@ def valid_generator(samples, batch_size=32):
 
         return image_set, angles_set
 
+#######
+# Old
+# trained_image_path = 'trained_data/left_track/IMG/'
+# images = []
+# # measurements = []
+# for idx, line in enumerate(lines):
+#     for i in range(3):
+#         # get image
+#         source_path = line[i]
+#         tokens = source_path.split('/')
+#         filename = tokens[-1]
+#
+#         # format to image
+#         # local_path = 'IMG/' + filename
+#         local_path = trained_image_path + filename
+#         image = cv2.imread(local_path)
+#         images.append(image)
+#
+#     # grab measurement
+#     correction = 0.2
+#     measurement = float(line[3])
+#     # center image measurement
+#     measurements.append(measurement)
+#     # left image measurement
+#     measurements.append(measurement + correction)
+#     # rightimage measurement
+#     measurements.append(measurement - correction)
+
+# print("Print images length: ", len(images))
+# print("Print measurements length: ", len(measurements))
+
+# augmented_images = []
+# augmented_measurements = []
+# for image, measurement in zip(images, measurements):
+#     augmented_images.append(image)
+#     augmented_measurements.append(measurement)
+#     # flip around the vertical axis
+#     flipped_image = cv2.flip(image, 1)
+#     flipped_measurement = float(measurement) * -1.0
+#
+#     augmented_images.append(flipped_image)
+#     augmented_measurements.append(flipped_measurement)
+# End - Old
+#######
+
+
+############################################
+# Step 3: Transform Training Data Into Numpy Arrays (Keras Expects That)
+# X_train = np.array(images)
+# y_train = np.array(measurements)
 train_generator = train_generator(train_samples, batch_size=32)
 valid_generator = valid_generator(validation_samples, batch_size=32)
 
-
-############################################
-# Step 3: Build Models and Execute
-############################################
-
+# Step 4: Build Small Keras Model
 model = Sequential()
-
 # normalization
 model.add(Lambda(lambda x: x / 255.0 - 0.5, input_shape=(160, 320, 3)))
 model.add(Cropping2D(cropping=((72,25),(0,0))))
 
-# NVIDIA Inspiration
+# nvidia nn
 model.add(Convolution2D(24,5,5,subsample=(2,2),activation='relu', name="conv0"))
 model.add(MaxPooling2D(pool_size=(2, 2), strides=(1,1)))
 
@@ -217,15 +251,49 @@ model.add(Dense(10, activation='relu'))
 model.add(Dropout(0.2))
 model.add(Dense(1))
 
+# model.add(Convolution2D(24, 5, 5, subsample=(2,2), activation="relu"))
+# model.add(Convolution2D(36, 5, 5, subsample=(2,2), activation="relu"))
+# model.add(Convolution2D(48, 5, 5, subsample=(2,2), activation="relu"))
+# model.add(Convolution2D(64, 5, 5, activation="relu"))
+# model.add(Convolution2D(64, 5, 5, activation="relu"))
+# model.add(Flatten())
+# model.add(Dense(100))
+# model.add(Dense(50))
+# model.add(Dense(10))
+# model.add(Dense(1))
+
+# original nn
+# model.add(Convolution2D(6, 5, 5, activation="relu"))
+# model.add(MaxPooling2D())
+# model.add(Convolution2D(6, 5, 5, activation="relu"))
+# model.add(MaxPooling2D())
+# model.add(Flatten())
+# model.add(Dense(120))
+# model.add(Dense(84))
+# model.add(Dense(1))
+
 adam = Adam(lr=1e-4, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
 model.compile(optimizer=adam, loss='mse')
 
+# model.fit(X_train, y_train, validation_split=0.2, shuffle=True, nb_epoch=5)
 history_object = model.fit_generator(
     train_generator,
     samples_per_epoch=len(train_samples),
     validation_data=valid_generator,
     nb_epoch=5,
     verbose=1)
+
+### print the keys contained in the history object
+print(history_object.history.keys())
+
+### plot the training and validation loss for each epoch
+plt.plot(history_object.history['loss'])
+plt.plot(history_object.history['val_loss'])
+plt.title('model mean squared error loss')
+plt.ylabel('mean squared error loss')
+plt.xlabel('epoch')
+plt.legend(['training set', 'validation set'], loc='upper right')
+plt.show()
 
 model.save('model.h5')
 K.clear_session()
